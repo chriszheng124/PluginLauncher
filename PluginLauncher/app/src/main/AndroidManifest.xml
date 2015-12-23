@@ -1,0 +1,39 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="zzh.com.pluginlauncher">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application android:allowBackup="true"
+                 android:label="@string/app_name"
+                 android:icon="@mipmap/ic_launcher"
+                 android:supportsRtl="true"
+                 android:theme="@style/AppTheme">
+
+        <activity android:name=".MainActivity"
+                  android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".Activity_A" />
+
+        <!-- plugin_a.apk-->
+        <activity android:name="tools.haha.com.plugin_1.PluginMainActivity" android:launchMode="singleTask"/>
+        <activity android:name="tools.haha.com.plugin_1.PluginActivity_1" android:launchMode="standard"/>
+        <activity android:name="tools.haha.com.plugin_1.PluginActivity_2" android:launchMode="standard"/>
+
+        <!-- plugin_b.apk-->
+        <activity android:name="com.yalantis.euclid.sample.MainActivity" />
+
+        <!-- plugin_c.apk-->
+        <activity android:name="tools.haha.com.androidtools.MainActivity" />
+        <activity android:name="tools.haha.com.androidtools.MyScrollViewActivity" />
+        <activity android:name="tools.haha.com.androidtools.TestActivity" />
+        <activity android:name="tools.haha.com.androidtools.TestActivity_1" />
+        <activity android:name="tools.haha.com.androidtools.ListViewActivity" />
+
+    </application>
+
+</manifest>
