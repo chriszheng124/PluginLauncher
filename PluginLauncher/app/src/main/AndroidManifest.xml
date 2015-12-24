@@ -30,7 +30,7 @@
         <!-- plugin_c.apk-->
         <activity android:name="tools.haha.com.androidtools.MainActivity" />
         <activity android:name="tools.haha.com.androidtools.MyScrollViewActivity" />
-        <activity android:name="tools.haha.com.androidtools.TestActivity" />
+        <activity android:name="tools.haha.com.androidtools.TestActivity" android:launchMode="singleTask" />
         <activity android:name="tools.haha.com.androidtools.TestActivity_1" />
         <activity android:name="tools.haha.com.androidtools.ListViewActivity" />
 

@@ -22,8 +22,7 @@ public class ClassLoaderHook extends ClassLoader{
         Collection<Plugin> plugins = PluginManager.getInstance().getPlugins();
         for (Plugin plugin : plugins){
             try {
-                Class<?> clazz = plugin.getClassLoader().findClass(className);
-                return clazz;
+                return plugin.getClassLoader().findClass(className);
             }catch (ClassNotFoundException e){
             }
         }

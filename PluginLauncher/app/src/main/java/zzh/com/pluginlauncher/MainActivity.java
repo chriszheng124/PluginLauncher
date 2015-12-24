@@ -1,47 +1,96 @@
 package zzh.com.pluginlauncher;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTabHost;
+import android.widget.TabHost;
 
+import com.squareup.otto.Subscribe;
+
+import zzh.com.pluginframework.BusProvider;
+import zzh.com.pluginframework.PluginEvent;
 import zzh.com.pluginframework.PluginManager;
 
-public class MainActivity extends Activity implements View.OnClickListener{
+public class MainActivity extends FragmentActivity
+        implements TabHost.OnTabChangeListener{
+    private final static String TAB_HOST_ID = "host";
+    private final static String TAB_A_ID = "plugin_a";
+    private final static String TAB_B_ID = "plugin_b";
+    private final static String TAB_C_ID = "plugin_c";
+
+    private final static String TAB_HOST_INDICATOR = "HOST";
+    private final static String TAB_A_INDICATOR = "Plugin_A";
+    private final static String TAB_B_INDICATOR = "Plugin_B";
+    private final static String TAB_C_INDICATOR = "Plugin_C";
+
+    private FragmentTabHost mTabHost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mTabHost = (FragmentTabHost)findViewById(R.id.tab_host);
+        mTabHost.setup(this, getSupportFragmentManager(), R.id.tab_content);
+
+        mTabHost.addTab(mTabHost.newTabSpec(TAB_HOST_ID).setIndicator(TAB_HOST_INDICATOR),
+                HostFragment.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec(TAB_A_ID).setIndicator(TAB_A_INDICATOR),
+                PluginFragment.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec(TAB_B_ID).setIndicator(TAB_B_INDICATOR),
+                PluginFragment.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec(TAB_C_ID).setIndicator(TAB_C_INDICATOR),
+                PluginFragment.class, null);
+
+        mTabHost.setOnTabChangedListener(this);
         PluginManager.getInstance().setContext(this);
+        BusProvider.getBus().register(this);
+    }
+
+    public boolean isCurrentPluginLoaded(){
+        String tabId = mTabHost.getCurrentTabTag();
+        if(tabId.equalsIgnoreCase(TAB_A_ID)){
+            return PluginManager.getInstance().isPluginInstalled(PluginManager.PLUGIN_A_PATH);
+        }else if (tabId.equalsIgnoreCase(TAB_B_ID)){
+            return PluginManager.getInstance().isPluginInstalled(PluginManager.PLUGIN_B_PATH);
+        }else if(tabId.equalsIgnoreCase(TAB_C_ID)) {
+            return PluginManager.getInstance().isPluginInstalled(PluginManager.PLUGIN_C_PATH);
+        }
+        return false;
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.plugin_a:
-                PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_A_PATH);
-                Intent intent_a = new Intent();
-                intent_a.setClassName(MainActivity.this, "tools.haha.com.plugin_1.PluginMainActivity");
-                startActivity(intent_a);
-                break;
-            case R.id.plugin_b:
-                PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_B_PATH);
-                Intent intent_b = new Intent();
-                intent_b.setClassName(MainActivity.this, "com.yalantis.euclid.sample.MainActivity");
-                startActivity(intent_b);
-                break;
-            case R.id.plugin_c:
-                PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_C_PATH);
-                Intent intent_c = new Intent();
-                intent_c.setClassName(MainActivity.this, "tools.haha.com.androidtools.MainActivity");
-                startActivity(intent_c);
-                break;
-            case R.id.host_a:
-                Intent intent = new Intent();
-                intent.setClassName(MainActivity.this, Activity_A.class.getName());
-                startActivity(intent);
-                break;
+    public void onTabChanged(String tabId) {
+        if(tabId.equalsIgnoreCase(TAB_A_ID)){
+            PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_A_PATH);
+        }else if (tabId.equalsIgnoreCase(TAB_B_ID)){
+            PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_B_PATH);
+        }else if(tabId.equalsIgnoreCase(TAB_C_ID)) {
+            PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_C_PATH);
+        }else {
+//            Intent intent = new Intent();
+//            intent.setClassName(MainActivity.this, Activity_A.class.getName());
+//            startActivity(intent);
+        }
+    }
+
+    @Subscribe
+    @SuppressWarnings("unused")
+    public void onReceivePluginEvent(PluginEvent event){
+        String tabId = mTabHost.getCurrentTabTag();
+        if(tabId.equalsIgnoreCase(TAB_A_ID)){
+            Intent intent_a = new Intent();
+            intent_a.setClassName(MainActivity.this, "tools.haha.com.plugin_1.PluginMainActivity");
+            startActivity(intent_a);
+        }else if (tabId.equalsIgnoreCase(TAB_B_ID)){
+            Intent intent_b = new Intent();
+            intent_b.setClassName(MainActivity.this, "com.yalantis.euclid.sample.MainActivity");
+            startActivity(intent_b);
+        }else if(tabId.equalsIgnoreCase(TAB_C_ID)) {
+            Intent intent_c = new Intent();
+            intent_c.setClassName(MainActivity.this, "tools.haha.com.androidtools.MainActivity");
+            startActivity(intent_c);
         }
     }
 }

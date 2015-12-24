@@ -95,7 +95,7 @@ public class InstrumentationHook extends Instrumentation {
             Field resourceField = ContextThemeWrapper.class.getDeclaredField("mResources");
             resourceField.setAccessible(true);
             resourceField.set(activity, plugin.getResources());
-
+            Log.v(PluginCfg.TAG, "hackContextThemeWrapper inject resource for " + activity.toString());
         }catch (Exception e){
             if(PluginCfg.DEBUG){
                 Log.v(PluginCfg.TAG, "hackContextThemeWrapper error : " + e.getMessage());

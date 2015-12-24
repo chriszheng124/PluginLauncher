@@ -22,26 +22,29 @@ import java.util.List;
 import java.util.Set;
 
 public class Plugin {
+    public static final int STATE_LOADING = 0;
+    public static final int STATE_LOADED = 1;
+
     private Activity mActivity;
     private String mPluginPath;
     private PluginClassLoader mClassLoader;
     private Object mLoadedApk;
     private ResourcesHook mResource;
+    private int mState;
     private HashSet<String> mComponents = new HashSet<>();
 
     public Plugin(Activity activity, String dexPath){
         mActivity = activity;
-        Log.v(PluginCfg.TAG, ">>>>>>begin loading");
-        long startTime = System.currentTimeMillis();
-        //TODO optdex cannot on UI thread
-        mClassLoader = PluginClassLoader.getLoader(activity, dexPath, Object.class.getClassLoader());
-        long endTime = System.currentTimeMillis();
-        long delta = endTime-startTime;
-        Log.v(PluginCfg.TAG, "end loading <<<<<< " + delta);
         mPluginPath = dexPath;
     }
 
     public void load(){
+        Log.v(PluginCfg.TAG, ">>>>>>begin loading");
+        long startTime = System.currentTimeMillis();
+        mClassLoader = PluginClassLoader.getLoader(mActivity, mPluginPath, Object.class.getClassLoader());
+        long endTime = System.currentTimeMillis();
+        long delta = endTime-startTime;
+        Log.v(PluginCfg.TAG, "end loading <<<<<< " + delta);
         try{
             makeComponentInfo();
             createLoadedApk();
@@ -69,6 +72,14 @@ public class Plugin {
 
     public ResourcesHook getResources(){
         return mResource;
+    }
+
+    public int getState(){
+        return mState;
+    }
+
+    public void setState(int state){
+        mState = state;
     }
 
     public boolean findComponent(String className){
@@ -131,8 +142,11 @@ public class Plugin {
 
     private void newApplication(){
         try {
-            String applicationName = getPackageInfo(mActivity, mPluginPath).applicationInfo.className;
-            Class<?> appClazz = mClassLoader.loadClass(applicationName);
+            ApplicationInfo applicationInfo = getPackageInfo(mActivity, mPluginPath).applicationInfo;
+            if(applicationInfo.className == null){
+                applicationInfo.className = "android.app.Application";
+            }
+            Class<?> appClazz = mClassLoader.loadClass(applicationInfo.className);
             Object app = appClazz.newInstance();
             Method attachMethod = Application.class.getDeclaredMethod("attach", Context.class);
             attachMethod.setAccessible(true);
@@ -180,7 +194,7 @@ public class Plugin {
     private static Set<String> generateNewAssetPaths(Application application, String newPath) {
         Set<String> mGenerateNewSet = new LinkedHashSet<>();
         try {
-            if (Build.VERSION.SDK_INT > 20) {
+            if (Build.VERSION.SDK_INT > 0) {
                 List<String> mOriginAssetsPath = getOriginAssetsPath(application.getResources().getAssets());
                 mGenerateNewSet.addAll(mOriginAssetsPath);
             }
@@ -189,7 +203,7 @@ public class Plugin {
         }
         if (newPath != null) {
             mGenerateNewSet.add(newPath);
-            mGenerateNewSet.add(application.getApplicationInfo().sourceDir);//TODO???
+            mGenerateNewSet.add(application.getApplicationInfo().sourceDir);
         }
         return mGenerateNewSet;
     }
