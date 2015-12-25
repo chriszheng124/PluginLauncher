@@ -1,8 +1,8 @@
 package zzh.com.pluginframework;
 
 import android.content.Context;
-import android.util.ArrayMap;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 import dalvik.system.DexClassLoader;
@@ -11,7 +11,7 @@ public class PluginClassLoader extends DexClassLoader {
     private final static String OPT_DIR = "plugin_opt_dex_dir";
     private final static String LIB_DIR = "plugin_lib_dir";
 
-    private static ArrayMap<String, PluginClassLoader> sLoaders = new ArrayMap<>();
+    private static HashMap<String, PluginClassLoader> sLoaders = new HashMap<>();
     private static HashSet<String> sClassNameOfLoadedClass = new HashSet<>();
 
     public PluginClassLoader(String dexPath, String optimizedDirectory, String libraryPath, ClassLoader parent) {

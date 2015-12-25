@@ -5,29 +5,22 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.util.ArrayMap;
 import android.util.Log;
-
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class PluginManager {
-//    public static final String PLUGIN_A_PATH = Environment.getExternalStorageDirectory().
-//            getPath().concat("/app-debug.apk");
-//    public static final String PLUGIN_B_PATH = Environment.getExternalStorageDirectory().
-//            getPath().concat("/plugin_b.apk");
-//    public static final String PLUGIN_C_PATH = Environment.getExternalStorageDirectory().
-//            getPath().concat("/plugin_c.apk");
+    public static String PLUGIN_A_PATH = "plugin_a.apk";
+    public static String PLUGIN_B_PATH = "plugin_b.apk";
+    public static String PLUGIN_C_PATH = "plugin_c.apk";
 
-    public static final String PLUGIN_A_PATH = ("/sdcard/plugin_a.apk");
-    public static final String PLUGIN_B_PATH = "/sdcard/plugin_b.apk";
-    public static final String PLUGIN_C_PATH = "/sdcard/plugin_c.apk";
     private static final String PREF_TAG = "installed_plugins";
 
     private SharedPreferences mPref;
     private Activity mActivity;
-    private ArrayMap<String, Plugin> mPlugins;
+    private HashMap<String, Plugin> mPlugins;
 
     static class PluginManagerHolder{
         static PluginManager instance = new PluginManager();
@@ -39,42 +32,27 @@ public class PluginManager {
 
     public void setContext(Activity context){
         mActivity = context;
-        mPlugins = new ArrayMap<>();
+        mPlugins = new HashMap<>();
         mPref = context.getSharedPreferences(PREF_TAG, Context.MODE_PRIVATE);
         FrameworkContext.sApp = mActivity.getApplication();
         injectInstrumentation();
     }
 
-    @Deprecated
-    public void syncLoadPlugin(String name){
+    public void loadPlugin(final String name){
         if(!isPluginLoaded(name)) {
             final Plugin plugin = new Plugin(mActivity, name);
             plugin.setState(Plugin.STATE_LOADING);
-            mPlugins.put(name, plugin);
-            plugin.load();
-            mPref.edit().putBoolean(plugin.getPluginPath(), true).apply();
-            plugin.setState(Plugin.STATE_LOADED);
-            BusProvider.getBus().post(new PluginEvent());
-        }else {
-            BusProvider.getBus().post(new PluginEvent());
-        }
-    }
-
-    public void loadPlugin(String name){
-        if(!isPluginLoaded(name)) {
-            final Plugin plugin = new Plugin(mActivity, name);
-            plugin.setState(Plugin.STATE_LOADING);
-            mPlugins.put(name, plugin);
             new AsyncTask<String, Void, Void>(){
                 @Override
                 protected Void doInBackground(String... params) {
                     plugin.load();
+                    mPlugins.put(plugin.getPluginPath(), plugin);
                     return null;
                 }
 
                 @Override
                 protected void onPostExecute(Void aVoid) {
-                    mPref.edit().putBoolean(plugin.getPluginPath(), true).apply();
+                    mPref.edit().putBoolean(name, true).apply();
                     plugin.setState(Plugin.STATE_LOADED);
                     BusProvider.getBus().post(new PluginEvent());
                 }

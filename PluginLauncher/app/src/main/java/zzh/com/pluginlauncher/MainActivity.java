@@ -14,10 +14,10 @@ import zzh.com.pluginframework.PluginManager;
 
 public class MainActivity extends FragmentActivity
         implements TabHost.OnTabChangeListener{
-    private final static String TAB_HOST_ID = "host";
-    private final static String TAB_A_ID = "plugin_a";
-    private final static String TAB_B_ID = "plugin_b";
-    private final static String TAB_C_ID = "plugin_c";
+    public final static String TAB_HOST_ID = "host";
+    public final static String TAB_A_ID = "plugin_a";
+    public final static String TAB_B_ID = "plugin_b";
+    public final static String TAB_C_ID = "plugin_c";
 
     private final static String TAB_HOST_INDICATOR = "HOST";
     private final static String TAB_A_INDICATOR = "Plugin_A";
@@ -50,6 +50,10 @@ public class MainActivity extends FragmentActivity
 
     public boolean isCurrentPluginLoaded(){
         String tabId = mTabHost.getCurrentTabTag();
+        return isCurrentPluginLoaded(tabId);
+    }
+
+    public boolean isCurrentPluginLoaded(String tabId){
         if(tabId.equalsIgnoreCase(TAB_A_ID)){
             return PluginManager.getInstance().isPluginInstalled(PluginManager.PLUGIN_A_PATH);
         }else if (tabId.equalsIgnoreCase(TAB_B_ID)){

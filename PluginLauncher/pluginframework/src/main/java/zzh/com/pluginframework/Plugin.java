@@ -13,6 +13,10 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -24,6 +28,7 @@ import java.util.Set;
 public class Plugin {
     public static final int STATE_LOADING = 0;
     public static final int STATE_LOADED = 1;
+    public static final String PLUGIN_DIR = "plugindir";
 
     private Activity mActivity;
     private String mPluginPath;
@@ -41,10 +46,11 @@ public class Plugin {
     public void load(){
         Log.v(PluginCfg.TAG, ">>>>>>begin loading");
         long startTime = System.currentTimeMillis();
+
+        copyFile();
         mClassLoader = PluginClassLoader.getLoader(mActivity, mPluginPath, Object.class.getClassLoader());
-        long endTime = System.currentTimeMillis();
-        long delta = endTime-startTime;
-        Log.v(PluginCfg.TAG, "end loading <<<<<< " + delta);
+
+        Log.v(PluginCfg.TAG, "end loading <<<<<< " + (System.currentTimeMillis() - startTime));
         try{
             makeComponentInfo();
             createLoadedApk();
@@ -227,6 +233,35 @@ public class Plugin {
 
             arrayList.clear();
             return arrayList;
+        }
+    }
+
+    private void copyFile(){
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            inputStream = mActivity.getAssets().open(mPluginPath);
+            File dir = mActivity.getDir(PLUGIN_DIR, Context.MODE_PRIVATE);
+            String newFilePath = dir+File.separator+mPluginPath;
+            outputStream = new FileOutputStream(newFilePath);
+            byte[] buf = new byte[1024];
+            while (-1 != inputStream.read(buf)){
+                outputStream.write(buf);
+            }
+            mPluginPath = newFilePath;
+        }catch (Exception e){
+            throw new RuntimeException("copy file " + mPluginPath + " failed!");
+        }finally {
+            try {
+                if(inputStream != null){
+                    inputStream.close();
+                }
+                if(outputStream != null){
+                    outputStream.close();
+                }
+            }catch (Exception e){
+                Log.v(PluginCfg.TAG, "close file " + mPluginPath + " error !");
+            }
         }
     }
 }

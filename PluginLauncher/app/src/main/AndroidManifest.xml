@@ -23,9 +23,11 @@
         <activity android:name="tools.haha.com.plugin_1.PluginMainActivity" android:launchMode="singleTask"/>
         <activity android:name="tools.haha.com.plugin_1.PluginActivity_1" android:launchMode="standard"/>
         <activity android:name="tools.haha.com.plugin_1.PluginActivity_2" android:launchMode="standard"/>
+        <!-- plugin_a.apk end-->
 
         <!-- plugin_b.apk-->
         <activity android:name="com.yalantis.euclid.sample.MainActivity" />
+        <!-- plugin_b.apk end-->
 
         <!-- plugin_c.apk-->
         <activity android:name="tools.haha.com.androidtools.MainActivity" />
@@ -33,6 +35,9 @@
         <activity android:name="tools.haha.com.androidtools.TestActivity" android:launchMode="singleTask" />
         <activity android:name="tools.haha.com.androidtools.TestActivity_1" />
         <activity android:name="tools.haha.com.androidtools.ListViewActivity" />
+
+        <service android:name="tools.haha.com.androidtools.MyLocalService" />
+        <!-- plugin_c.apk end-->
 
     </application>
 

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PluginLauncher</string>
+    <string name="startLocalService">startLocalService</string>
+    <string name="bindLocalService">bindLocalService</string>
 </resources>

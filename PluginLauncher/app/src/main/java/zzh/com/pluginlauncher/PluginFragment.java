@@ -28,10 +28,6 @@ public class PluginFragment extends Fragment{
                              @Nullable Bundle savedInstanceState) {
         FrameLayout frameLayout = (FrameLayout)inflater.inflate(R.layout.layout_loading_plugin, null);
         mLoadingView = frameLayout.findViewById(R.id.progress_bar);
-        MainActivity activity = (MainActivity)getActivity();
-        if(activity.isCurrentPluginLoaded()){
-            mLoadingView.setVisibility(View.GONE);
-        }
         return frameLayout;
     }
 
