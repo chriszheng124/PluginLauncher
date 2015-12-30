@@ -44,7 +44,6 @@ public class MainActivity extends FragmentActivity
                 PluginFragment.class, null);
 
         mTabHost.setOnTabChangedListener(this);
-        PluginManager.getInstance().setContext(this);
         BusProvider.getBus().register(this);
     }
 

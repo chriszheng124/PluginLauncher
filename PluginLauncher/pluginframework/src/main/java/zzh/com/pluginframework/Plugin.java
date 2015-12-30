@@ -42,18 +42,17 @@ public class Plugin {
         Log.v(PluginCfg.TAG, ">>>>>>begin loading");
         long startTime = System.currentTimeMillis();
 
-        copyFile();
-        mClassLoader = PluginClassLoader.getLoader(FrameworkContext.sApp, mPluginPath, Object.class.getClassLoader());
+        installIfNeeded();
+        mClassLoader = PluginClassLoader.getLoader(FrameworkContext.sApp, mPluginPath,
+                Object.class.getClassLoader());
 
-        Log.v(PluginCfg.TAG, "end loading <<<<<< " + (System.currentTimeMillis() - startTime));
+        Log.v(PluginCfg.TAG, "end loading <<<<<< " + (System.currentTimeMillis() - startTime) + "MS");
         try{
             makeComponentInfo();
             injectResources();
             newApplication();
         }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                Log.v(PluginCfg.TAG, "loadPlugin failed " + e.getMessage());
-            }
+            throw new RuntimeException(e);
         }
     }
 
@@ -88,9 +87,7 @@ public class Plugin {
                 mComponents.add(info.name);
             }
         }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                e.printStackTrace();
-            }
+            throw new RuntimeException(e);
         }
     }
 
@@ -115,9 +112,7 @@ public class Plugin {
             attachMethod.invoke(app, FrameworkContext.sApp);
             ((Application)app).onCreate();
         }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                e.printStackTrace();
-            }
+            throw new RuntimeException(e);
         }
     }
 
@@ -147,9 +142,7 @@ public class Plugin {
             themeField.set(FrameworkContext.sApp.getBaseContext(), null);
 
         }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                Log.v(PluginCfg.TAG, "hackContextThemeWrapper error : " + e.getMessage());
-            }
+            throw new RuntimeException(e);
         }
     }
 
@@ -192,7 +185,7 @@ public class Plugin {
         }
     }
 
-    private void copyFile(){
+    private void installIfNeeded(){
         InputStream inputStream = null;
         OutputStream outputStream = null;
         try {

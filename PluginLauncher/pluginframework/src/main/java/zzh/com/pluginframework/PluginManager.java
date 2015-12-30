@@ -1,6 +1,5 @@
 package zzh.com.pluginframework;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -17,9 +16,7 @@ public class PluginManager {
     private static final String PREF_TAG = "installed_plugins";
 
     private SharedPreferences mPref;
-    private Activity mActivity;
     private HashMap<String, Plugin> mPlugins;
-    private FrameworkContext mFramework;
 
     static class PluginManagerHolder{
         static PluginManager instance = new PluginManager();
@@ -30,15 +27,8 @@ public class PluginManager {
     }
 
     public void init(Application app){
-        FrameworkContext.sApp = app;
         mPlugins = new HashMap<>();
         mPref = app.getSharedPreferences(PREF_TAG, Context.MODE_PRIVATE);
-        mFramework = new FrameworkContext();
-        mFramework.init();
-    }
-
-    public void setContext(Activity context){
-        mActivity = context;
     }
 
     public void loadPlugin(String name){

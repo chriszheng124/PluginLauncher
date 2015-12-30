@@ -1,12 +1,10 @@
 package zzh.com.pluginframework;
 
-import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.os.Handler;
-import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,8 +12,11 @@ import java.lang.reflect.Method;
 public class FrameworkContext {
     public static Application sApp;
     public static Object sLoadedApk;
+    public static ClassLoader sClassLoader;
 
-    public void init(){
+    public void init(Application app){
+        sClassLoader = app.getClassLoader();
+        sApp = app;
         hookActivityThreadH();
         hookInstrumentation();
         createLoadedApk();
@@ -32,9 +33,7 @@ public class FrameworkContext {
             InstrumentationHook instrumentationHook = new InstrumentationHook(instrumentation);
             fieldInstrumentation.set(activityThread, instrumentationHook);
         }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                Log.v(PluginCfg.TAG, "injectInstrumentation error : " + e.getMessage());
-            }
+            throw new RuntimeException(e);
         }
     }
 
@@ -49,9 +48,7 @@ public class FrameworkContext {
             callbackField.setAccessible(true);
             callbackField.set(handler, callback);
         }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                e.printStackTrace();
-            }
+            throw new RuntimeException(e);
         }
     }
 
@@ -69,9 +66,7 @@ public class FrameworkContext {
             sLoadedApk = getPackageInfoNoCheckMethod.invoke(activityThreadInstance,
                     sApp.getApplicationInfo(), compatibilityInfo);
         } catch (Exception e) {
-            if(PluginCfg.DEBUG){
-                e.printStackTrace();
-            }
+            throw new RuntimeException(e);
         }
     }
 
@@ -82,9 +77,7 @@ public class FrameworkContext {
             ClassLoaderHook classLoaderHook = new ClassLoaderHook(sApp);
             mClassLoaderField.set(sLoadedApk, classLoaderHook);
         }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                e.printStackTrace();
-            }
+            throw new RuntimeException(e);
         }
     }
 

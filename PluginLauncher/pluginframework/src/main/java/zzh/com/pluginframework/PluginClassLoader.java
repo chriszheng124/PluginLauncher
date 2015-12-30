@@ -14,11 +14,13 @@ public class PluginClassLoader extends DexClassLoader {
     private static HashMap<String, PluginClassLoader> sLoaders = new HashMap<>();
     private static HashSet<String> sClassNameOfLoadedClass = new HashSet<>();
 
-    public PluginClassLoader(String dexPath, String optimizedDirectory, String libraryPath, ClassLoader parent) {
+    public PluginClassLoader(String dexPath, String optimizedDirectory,
+                             String libraryPath, ClassLoader parent) {
         super(dexPath, optimizedDirectory, libraryPath, parent);
     }
 
-    public static PluginClassLoader getLoader(Context context, String dexPath, ClassLoader parentLoader){
+    public static PluginClassLoader getLoader(Context context, String dexPath,
+                                              ClassLoader parentLoader){
         PluginClassLoader loader = sLoaders.get(dexPath);
         if(loader == null){
             String optimizedDirectory = context.getDir(OPT_DIR, Context.MODE_PRIVATE).getAbsolutePath();
@@ -40,7 +42,7 @@ public class PluginClassLoader extends DexClassLoader {
             clazz = super.findClass(name);
             sClassNameOfLoadedClass.add(name);
         }catch (ClassNotFoundException e){
-            throw new ClassNotFoundException(e.getMessage());
+            clazz = FrameworkContext.sClassLoader.loadClass(name);
         }
         return clazz;
     }

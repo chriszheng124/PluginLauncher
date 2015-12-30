@@ -7,7 +7,7 @@
                  android:label="@string/app_name"
                  android:icon="@mipmap/ic_launcher"
                  android:supportsRtl="true"
-                 android:name=".App"
+                 android:name=".PluginLauncherApp"
                  android:theme="@style/AppTheme">
 
         <activity android:name=".MainActivity"
