@@ -67,11 +67,11 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onTabChanged(String tabId) {
         if(tabId.equalsIgnoreCase(TAB_A_ID)){
-            PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_A_PATH);
+            PluginManager.getInstance().loadPluginAsync(PluginManager.PLUGIN_A_PATH);
         }else if (tabId.equalsIgnoreCase(TAB_B_ID)){
-            PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_B_PATH);
+            PluginManager.getInstance().loadPluginAsync(PluginManager.PLUGIN_B_PATH);
         }else if(tabId.equalsIgnoreCase(TAB_C_ID)) {
-            PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_C_PATH);
+            PluginManager.getInstance().loadPluginAsync(PluginManager.PLUGIN_C_PATH);
         }else {
 //            Intent intent = new Intent();
 //            intent.setClassName(MainActivity.this, Activity_A.class.getName());

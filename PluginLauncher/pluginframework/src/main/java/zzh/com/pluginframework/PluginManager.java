@@ -1,13 +1,11 @@
 package zzh.com.pluginframework;
 
 import android.app.Activity;
-import android.app.Instrumentation;
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -21,6 +19,7 @@ public class PluginManager {
     private SharedPreferences mPref;
     private Activity mActivity;
     private HashMap<String, Plugin> mPlugins;
+    private FrameworkContext mFramework;
 
     static class PluginManagerHolder{
         static PluginManager instance = new PluginManager();
@@ -30,17 +29,32 @@ public class PluginManager {
         return PluginManagerHolder.instance;
     }
 
-    public void setContext(Activity context){
-        mActivity = context;
+    public void init(Application app){
+        FrameworkContext.sApp = app;
         mPlugins = new HashMap<>();
-        mPref = context.getSharedPreferences(PREF_TAG, Context.MODE_PRIVATE);
-        FrameworkContext.sApp = mActivity.getApplication();
-        injectInstrumentation();
+        mPref = app.getSharedPreferences(PREF_TAG, Context.MODE_PRIVATE);
+        mFramework = new FrameworkContext();
+        mFramework.init();
     }
 
-    public void loadPlugin(final String name){
+    public void setContext(Activity context){
+        mActivity = context;
+    }
+
+    public void loadPlugin(String name){
         if(!isPluginLoaded(name)) {
-            final Plugin plugin = new Plugin(mActivity, name);
+            final Plugin plugin = new Plugin(name);
+            plugin.setState(Plugin.STATE_LOADING);
+            plugin.load();
+            mPlugins.put(plugin.getPluginPath(), plugin);
+            mPref.edit().putBoolean(name, true).apply();
+            plugin.setState(Plugin.STATE_LOADED);
+        }
+    }
+
+    public void loadPluginAsync(final String name){
+        if(!isPluginLoaded(name)) {
+            final Plugin plugin = new Plugin(name);
             plugin.setState(Plugin.STATE_LOADING);
             new AsyncTask<String, Void, Void>(){
                 @Override
@@ -88,25 +102,4 @@ public class PluginManager {
     public Plugin getPluginByName(String name){
         return mPlugins.get(name);
     }
-
-    private void injectInstrumentation(){
-        try{
-            Field fieldInstrumentation = Activity.class.getDeclaredField("mInstrumentation");
-            fieldInstrumentation.setAccessible(true);
-            Instrumentation instrumentation = (Instrumentation)fieldInstrumentation.get(mActivity);
-            InstrumentationHook instrumentationHook = new InstrumentationHook(instrumentation);
-            fieldInstrumentation.set(mActivity, instrumentationHook);
-            Field activityThread = Activity.class.getDeclaredField("mMainThread");
-            activityThread.setAccessible(true);
-            Object object = activityThread.get(mActivity);
-            Field activityThreadInstrumentation = object.getClass().getDeclaredField("mInstrumentation");
-            activityThreadInstrumentation.setAccessible(true);
-            activityThreadInstrumentation.set(object, instrumentationHook);
-        }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                Log.v(PluginCfg.TAG, "injectInstrumentation error : " + e.getMessage());
-            }
-        }
-    }
-
 }

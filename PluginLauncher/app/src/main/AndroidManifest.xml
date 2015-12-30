@@ -7,6 +7,7 @@
                  android:label="@string/app_name"
                  android:icon="@mipmap/ic_launcher"
                  android:supportsRtl="true"
+                 android:name=".App"
                  android:theme="@style/AppTheme">
 
         <activity android:name=".MainActivity"
@@ -34,9 +35,10 @@
         <activity android:name="tools.haha.com.androidtools.MyScrollViewActivity" />
         <activity android:name="tools.haha.com.androidtools.TestActivity" android:launchMode="singleTask" />
         <activity android:name="tools.haha.com.androidtools.TestActivity_1" />
-        <activity android:name="tools.haha.com.androidtools.ListViewActivity" />
+        <activity android:name="tools.haha.com.androidtools.ListViewActivity" android:process=":remote_0"/>
 
         <service android:name="tools.haha.com.androidtools.MyLocalService" />
+        <service android:name="tools.haha.com.androidtools.MyRemoteService" android:process=":service_1" />
         <!-- plugin_c.apk end-->
 
     </application>

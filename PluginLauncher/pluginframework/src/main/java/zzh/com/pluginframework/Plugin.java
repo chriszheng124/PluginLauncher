@@ -1,6 +1,5 @@
 package zzh.com.pluginframework;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -8,7 +7,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-import android.content.res.Resources;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
@@ -30,16 +28,13 @@ public class Plugin {
     public static final int STATE_LOADED = 1;
     public static final String PLUGIN_DIR = "plugindir";
 
-    private Activity mActivity;
     private String mPluginPath;
     private PluginClassLoader mClassLoader;
-    private Object mLoadedApk;
     private ResourcesHook mResource;
     private int mState;
     private HashSet<String> mComponents = new HashSet<>();
 
-    public Plugin(Activity activity, String dexPath){
-        mActivity = activity;
+    public Plugin(String dexPath){
         mPluginPath = dexPath;
     }
 
@@ -48,13 +43,11 @@ public class Plugin {
         long startTime = System.currentTimeMillis();
 
         copyFile();
-        mClassLoader = PluginClassLoader.getLoader(mActivity, mPluginPath, Object.class.getClassLoader());
+        mClassLoader = PluginClassLoader.getLoader(FrameworkContext.sApp, mPluginPath, Object.class.getClassLoader());
 
         Log.v(PluginCfg.TAG, "end loading <<<<<< " + (System.currentTimeMillis() - startTime));
         try{
             makeComponentInfo();
-            createLoadedApk();
-            injectClassLoader();
             injectResources();
             newApplication();
         }catch (Exception e){
@@ -66,10 +59,6 @@ public class Plugin {
 
     public String getPluginPath(){
         return mPluginPath;
-    }
-
-    public Object getLoadedApk(){
-        return mLoadedApk;
     }
 
     public PluginClassLoader getClassLoader(){
@@ -94,7 +83,7 @@ public class Plugin {
 
     private void makeComponentInfo(){
         try {
-            PackageInfo packageInfo = getPackageInfo(mActivity, mPluginPath);
+            PackageInfo packageInfo = getPackageInfo(FrameworkContext.sApp, mPluginPath);
             for (ActivityInfo info : packageInfo.activities){
                 mComponents.add(info.name);
             }
@@ -107,48 +96,15 @@ public class Plugin {
 
     public static PackageInfo getPackageInfo(Context cxt, String apkPath)
             throws PackageManager.NameNotFoundException {
-        return cxt.getPackageManager().getPackageArchiveInfo(apkPath,
+        PackageManager packageManager = cxt.getPackageManager();
+        return packageManager.getPackageArchiveInfo(apkPath,
                 PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_RECEIVERS);
-    }
-
-    private void createLoadedApk(){
-        try {
-            Method getCompatibilityInfoMethod = Resources.class.getDeclaredMethod("getCompatibilityInfo");
-            getCompatibilityInfoMethod.setAccessible(true);
-            Object compatibilityInfo = getCompatibilityInfoMethod.invoke(mActivity.getResources());
-
-            Field activityThread = Activity.class.getDeclaredField("mMainThread");
-            activityThread.setAccessible(true);
-            Object activityThreadInstance = activityThread.get(mActivity);
-            Class cls = Class.forName("android.content.res.CompatibilityInfo");
-            Method getPackageInfoNoCheckMethod = Class.forName("android.app.ActivityThread").
-                    getDeclaredMethod("getPackageInfoNoCheck", ApplicationInfo.class, cls);
-            getPackageInfoNoCheckMethod.setAccessible(true);
-            mLoadedApk = getPackageInfoNoCheckMethod.invoke(activityThreadInstance,
-                    mActivity.getApplicationInfo(), compatibilityInfo);
-        } catch (Exception e) {
-            if(PluginCfg.DEBUG){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void injectClassLoader(){
-        try {
-            Field mClassLoaderField = mLoadedApk.getClass().getDeclaredField("mClassLoader");
-            mClassLoaderField.setAccessible(true);
-            ClassLoaderHook classLoaderHook = new ClassLoaderHook(mActivity);
-            mClassLoaderField.set(mLoadedApk, classLoaderHook);
-        }catch (Exception e){
-            if(PluginCfg.DEBUG){
-                e.printStackTrace();
-            }
-        }
     }
 
     private void newApplication(){
         try {
-            ApplicationInfo applicationInfo = getPackageInfo(mActivity, mPluginPath).applicationInfo;
+            PackageInfo packageInfo = getPackageInfo(FrameworkContext.sApp, mPluginPath);
+            ApplicationInfo applicationInfo = packageInfo.applicationInfo;
             if(applicationInfo.className == null){
                 applicationInfo.className = "android.app.Application";
             }
@@ -156,7 +112,7 @@ public class Plugin {
             Object app = appClazz.newInstance();
             Method attachMethod = Application.class.getDeclaredMethod("attach", Context.class);
             attachMethod.setAccessible(true);
-            attachMethod.invoke(app, mActivity.getApplication());
+            attachMethod.invoke(app, FrameworkContext.sApp);
             ((Application)app).onCreate();
         }catch (Exception e){
             if(PluginCfg.DEBUG){
@@ -177,9 +133,9 @@ public class Plugin {
                     FrameworkContext.sApp.getResources().getDisplayMetrics(),
                     FrameworkContext.sApp.getResources().getConfiguration());
 
-            Field loadedApkResourceField = getLoadedApk().getClass().getDeclaredField("mResources");
+            Field loadedApkResourceField = FrameworkContext.sLoadedApk.getClass().getDeclaredField("mResources");
             loadedApkResourceField.setAccessible(true);
-            loadedApkResourceField.set(getLoadedApk(), mResource);
+            loadedApkResourceField.set(FrameworkContext.sLoadedApk, mResource);
 
             Class<?> clazz = Class.forName("android.app.ContextImpl");
             Field contextImplResourceField = clazz.getDeclaredField("mResources");
@@ -219,10 +175,10 @@ public class Plugin {
         try {
             Method declaredMethod = assetManager.getClass().getDeclaredMethod("getStringBlockCount");
             declaredMethod.setAccessible(true);
-            int intValue = ((Integer) declaredMethod.invoke(assetManager)).intValue();
+            int intValue = (int)declaredMethod.invoke(assetManager);
             for (int i = 0; i < intValue; i++) {
                 String cookieName = (String) assetManager.getClass().getMethod("getCookieName",
-                        new Class[]{Integer.TYPE}).invoke(assetManager, Integer.valueOf(i + 1));
+                        new Class[]{Integer.TYPE}).invoke(assetManager, i + 1);
                 if (!TextUtils.isEmpty(cookieName)) {
                     arrayList.add(cookieName);
                 }
@@ -240,16 +196,21 @@ public class Plugin {
         InputStream inputStream = null;
         OutputStream outputStream = null;
         try {
-            inputStream = mActivity.getAssets().open(mPluginPath);
-            File dir = mActivity.getDir(PLUGIN_DIR, Context.MODE_PRIVATE);
-            String newFilePath = dir+File.separator+mPluginPath;
+            File dir = FrameworkContext.sApp.getDir(PLUGIN_DIR, Context.MODE_PRIVATE);
+            String newFilePath = dir.getAbsolutePath() + File.separator+mPluginPath;
+            if(new File(newFilePath).exists()){
+                mPluginPath = newFilePath;
+                return;
+            }
             outputStream = new FileOutputStream(newFilePath);
+            inputStream = FrameworkContext.sApp.getAssets().open(mPluginPath);
             byte[] buf = new byte[1024];
             while (-1 != inputStream.read(buf)){
                 outputStream.write(buf);
             }
             mPluginPath = newFilePath;
         }catch (Exception e){
+            e.printStackTrace();
             throw new RuntimeException("copy file " + mPluginPath + " failed!");
         }finally {
             try {
