@@ -1,6 +1,5 @@
 package zzh.com.pluginframework;
 
-import android.content.Context;
 import android.util.Log;
 
 import java.util.Collection;
@@ -8,8 +7,8 @@ import java.util.Collection;
 
 public class ClassLoaderHook extends ClassLoader{
 
-    public ClassLoaderHook(Context context) {
-        super(context.getClassLoader());
+    public ClassLoaderHook(ClassLoader parent) {
+        super(parent);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package zzh.com.pluginlauncher;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
@@ -30,7 +31,7 @@ public class PluginLauncherApp extends Application{
         super.attachBaseContext(base);
         mFramework.init(this);
         PluginManager.getInstance().init(this);
-        if(!(getPackageName().equalsIgnoreCase(getProcessName()))) {
+        if(inChildProcess()) {
             PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_A_PATH);
             PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_B_PATH);
             PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_C_PATH);
@@ -41,7 +42,7 @@ public class PluginLauncherApp extends Application{
     public void onCreate() {
         super.onCreate();
         if(PluginCfg.DEBUG){
-            Log.v(PluginCfg.TAG, "PluginLauncherApp:onCreate  was called");
+            Log.v(PluginCfg.TAG, "PluginLauncherApp:onCreate  was called ");
         }
     }
 
@@ -67,5 +68,9 @@ public class PluginLauncherApp extends Application{
                 }
         }
         return name;
+    }
+
+    private boolean inChildProcess(){
+        return !(getPackageName().equalsIgnoreCase(getProcessName()));
     }
 }

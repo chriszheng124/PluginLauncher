@@ -74,7 +74,7 @@ public class FrameworkContext {
         try {
             Field mClassLoaderField = sLoadedApk.getClass().getDeclaredField("mClassLoader");
             mClassLoaderField.setAccessible(true);
-            ClassLoaderHook classLoaderHook = new ClassLoaderHook(sApp);
+            ClassLoaderHook classLoaderHook = new ClassLoaderHook(FrameworkContext.sClassLoader);
             mClassLoaderField.set(sLoadedApk, classLoaderHook);
         }catch (Exception e){
             throw new RuntimeException(e);
