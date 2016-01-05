@@ -32,6 +32,9 @@ public class PluginLauncherApp extends Application{
         mFramework.init(this);
         PluginManager.getInstance().init(this);
         if(inChildProcess()) {
+            /**
+             * TODO: move below code to ActivityThreadHandlerHook
+             */
             PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_A_PATH);
             PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_B_PATH);
             PluginManager.getInstance().loadPlugin(PluginManager.PLUGIN_C_PATH);
