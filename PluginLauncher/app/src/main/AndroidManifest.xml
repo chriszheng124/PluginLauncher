@@ -24,6 +24,33 @@
         <activity android:name="tools.haha.com.plugin_1.PluginMainActivity" android:launchMode="singleTask"/>
         <activity android:name="tools.haha.com.plugin_1.PluginActivity_1" android:launchMode="standard"/>
         <activity android:name="tools.haha.com.plugin_1.PluginActivity_2" android:launchMode="standard"/>
+        <!-- -->
+        <activity
+            android:name="com.gc.materialdesigndemo.ui.MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.gc.materialdesigndemo.ui.ButtonsActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.gc.materialdesigndemo.ui.SwitchActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.gc.materialdesigndemo.ui.ProgressActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.gc.materialdesigndemo.ui.WidgetActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+        </activity>
+
         <!-- plugin_a.apk end-->
 
         <!-- plugin_b.apk-->

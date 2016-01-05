@@ -43,7 +43,7 @@ public class FrameworkContext {
             Field mHField = activityThread.getClass().getDeclaredField("mH");
             mHField.setAccessible(true);
             Handler handler = (Handler)mHField.get(activityThread);
-            Handler.Callback callback = new ActivityThreadHandlerHook();
+            Handler.Callback callback = new ActivityThreadHandlerHook(handler);
             Field callbackField = Handler.class.getDeclaredField("mCallback");
             callbackField.setAccessible(true);
             callbackField.set(handler, callback);

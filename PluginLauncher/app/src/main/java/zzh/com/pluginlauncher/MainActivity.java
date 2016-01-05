@@ -84,7 +84,8 @@ public class MainActivity extends FragmentActivity
         String tabId = mTabHost.getCurrentTabTag();
         if(tabId.equalsIgnoreCase(TAB_A_ID)){
             Intent intent_a = new Intent();
-            intent_a.setClassName(MainActivity.this, "tools.haha.com.plugin_1.PluginMainActivity");
+            //intent_a.setClassName(MainActivity.this, "tools.haha.com.plugin_1.PluginMainActivity");
+            intent_a.setClassName(MainActivity.this, "com.gc.materialdesigndemo.ui.MainActivity");
             startActivity(intent_a);
         }else if (tabId.equalsIgnoreCase(TAB_B_ID)){
             Intent intent_b = new Intent();

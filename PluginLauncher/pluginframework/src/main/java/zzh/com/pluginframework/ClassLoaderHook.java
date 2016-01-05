@@ -13,6 +13,9 @@ public class ClassLoaderHook extends ClassLoader{
 
     @Override
     public Class<?> loadClass(String className) throws ClassNotFoundException {
+        if(PluginCfg.DEBUG){
+            Log.v(PluginCfg.TAG, "class " + className + " was loaded");
+        }
         return super.loadClass(className);
     }
 
